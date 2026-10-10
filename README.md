@@ -8,6 +8,8 @@ A collection of [Claude skills](https://docs.claude.com/en/docs/claude-code/skil
 |---|---|---|
 | [code2srs](en/code2srs/SKILL.md) | EN | Reverse-engineer an SRS from the source code of a web app, in English: screens, business flows, cron jobs, glossary, database |
 | [code2srs](vi/code2srs/SKILL.md) | VI | Same as above, generating the SRS in Vietnamese |
+| [srs-manager](en/srs-manager/SKILL.md) | EN | Initialize and manage an SRS in `docs/srs/`: `REQ-{MODULE}-{NUMBER}` IDs, requirement statuses, traceability matrix, in-code annotations |
+| [srs-manager](vi/srs-manager/SKILL.md) | VI | Same as above, in Vietnamese |
 
 ## Installation
 
