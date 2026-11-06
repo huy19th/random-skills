@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+  body { margin: 0; font: 16px/1.6 system-ui, sans-serif; background: #fdfdfc; color: #1f2328; }
+  .banner { position: sticky; top: 0; background: #f3f5f8; border-bottom: 1px solid #e5e7eb; padding: 8px 20px; font-size: .85rem; }
+  main { max-width: 860px; margin: 0 auto; padding: 0 20px 60vh; }
+  pre { white-space: pre-wrap; font: 14px/1.5 ui-monospace, Consolas, monospace; }
+  mark { background: #fff3bf; color: inherit; scroll-margin-top: 30vh; border-radius: 2px; }
+  mark:target { background: #ffd43b; outline: 3px solid #f59f00; }
+  .page { display: block; margin: 2em 0 .5em; padding-top: .5em; border-top: 1px dashed #ccc; color: #888; font: 12px system-ui, sans-serif; }
+  .ts { font: 13px ui-monospace, Consolas, monospace; margin-right: 6px; text-decoration: none; }
+  table { border-collapse: collapse; } td, th { border: 1px solid #ddd; padding: 4px 8px; }
+  img { max-width: 100%; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #15171a; color: #e6e6e6; }
+    .banner { background: #1e2126; border-color: #2d3138; }
+    a { color: #5aa9ff; }
+    mark { background: #4a3f12; }
+    mark:target { background: #7a5d00; outline-color: #f59f00; }
+  }
+</style>
+</head>
+<body>
+<div class="banner">Saved copy of <a href="{{URL}}">{{URL}}</a> · saved {{SAVED}}</div>
+<main>
+{{BODY}}
+</main>
+</body>
+</html>

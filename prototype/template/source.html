@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<!--
+  Bản lưu của một nguồn. Agent tạo file này khi lưu nguồn vào knowledge/sources/.
+  - Chỉ giữ nội dung chính: bỏ menu, quảng cáo, footer.
+  - PDF: mỗi trang có <span id="page-<số>"></span> ở đầu trang.
+  - Video: mỗi đoạn bắt đầu bằng mốc thời gian, link về video gốc: <a href="https://youtu.be/xxx?t=754">[12:34]</a>
+  - Mỗi đoạn được trích dẫn trong bản tóm tắt được bọc bằng <mark id="q-<số>">…</mark>, nguyên văn, không sửa chữ.
+-->
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+  body { margin: 0; font: 16px/1.6 system-ui, sans-serif; background: #fdfdfc; color: #1f2328; }
+  .banner { position: sticky; top: 0; background: #f3f5f8; border-bottom: 1px solid #e5e7eb; padding: 8px 20px; font-size: .85rem; }
+  main { max-width: 860px; margin: 0 auto; padding: 0 20px 60vh; }
+  pre { white-space: pre-wrap; font: 14px/1.5 ui-monospace, Consolas, monospace; }
+  mark { background: #fff3bf; color: inherit; scroll-margin-top: 30vh; border-radius: 2px; }
+  mark:target { background: #ffd43b; outline: 3px solid #f59f00; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #15171a; color: #e6e6e6; }
+    .banner { background: #1e2126; border-color: #2d3138; }
+    a { color: #5aa9ff; }
+    mark { background: #4a3f12; }
+    mark:target { background: #7a5d00; outline-color: #f59f00; }
+  }
+</style>
+</head>
+<body>
+<div class="banner">Bản lưu của <a href="{{URL}}">{{URL}}</a> · lưu ngày {{SAVED}}</div>
+<main>
+{{BODY}}
+</main>
+</body>
+</html>

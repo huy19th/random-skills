@@ -1,0 +1,170 @@
+<!--
+  File nội dung của một chủ đề. Agent chỉ viết file này; build.mjs sinh index.html.
+  Bộ tag được dùng:
+  - L0: <section class="tldr"><p>…</p></section>
+  - L1 có chi tiết: <li><details><summary>ý chính</summary><div class="detail">L2</div></details></li>
+  - L1 không có chi tiết: <li>ý chính</li>
+  - Keyword trong file này: <a class="term" href="#term-xxx">…</a>
+  - Keyword trong glossary chung: <a class="term" href="../glossary/index.html#term-xxx">…</a>
+  - Link nguồn (để trống, build tự điền [n]): <a class="src" href="../sources/<file>.html#q-<số>"></a>
+  - Ý không có trong nguồn: <span class="inference">Suy luận</span>
+-->
+<article data-title="HTTP Caching" data-created="2026-11-05" data-updated="2026-11-05">
+
+<section class="tldr">
+  <p>HTTP cache lưu lại response để dùng lại cho các request sau, giảm độ trễ và băng thông.</p>
+  <p>Response còn <a class="term" href="#term-fresh">fresh</a> thì dùng ngay; đã <a class="term" href="#term-stale">stale</a> thì phải <a class="term" href="#term-validation">validate</a> với <a class="term" href="../glossary/index.html#term-origin-server">origin server</a> trước khi dùng.</p>
+  <p>Server điều khiển cache chủ yếu bằng header <code>Cache-Control</code>.</p>
+</section>
+
+<section>
+<h2>Cache hoạt động thế nào</h2>
+<ul class="points">
+  <li><details><summary>Dùng lại response đã lưu là hành vi mặc định, trừ khi có yêu cầu ngăn lại <a class="src" href="../sources/rfc9111.html#q-1"></a></summary>
+    <div class="detail">
+      <p>Vì vậy, các quy định về cache tập trung vào việc <strong>ngăn</strong> cache lưu hoặc dùng lại sai, chứ không bắt cache phải lưu response nào.</p>
+    </div>
+  </details></li>
+  <li><details><summary>Có 2 loại cache: <a class="term" href="../glossary/index.html#term-shared-cache">shared cache</a> (CDN, proxy) và <a class="term" href="../glossary/index.html#term-private-cache">private cache</a> (trình duyệt) <a class="src" href="../sources/rfc9111.html#q-20"></a><a class="src" href="../sources/rfc9111.html#q-21"></a></summary>
+    <div class="detail">
+      <p>Phân biệt 2 loại này quan trọng vì một số directive chỉ áp dụng cho shared cache, ví dụ <code>s-maxage</code> và <code>private</code>.</p>
+    </div>
+  </details></li>
+  <li><details><summary>Cache chọn response bằng <a class="term" href="#term-cache-key">cache key</a>, tối thiểu gồm method và URI của request <a class="src" href="../sources/rfc9111.html#q-2"></a></summary>
+    <div class="detail">
+      <p>Thực tế nhiều cache chỉ cache request <code>GET</code>, nên chỉ dùng URI làm cache key. <a class="src" href="../sources/rfc9111.html#q-3"></a></p>
+      <p>Header <code>Vary</code> trong response cho phép thêm một số header của request vào cache key, ví dụ <code>Vary: Accept-Language</code> để lưu riêng bản tiếng Anh và tiếng Việt.</p>
+    </div>
+  </details></li>
+</ul>
+</section>
+
+<section>
+<h2>Fresh và stale</h2>
+<ul class="points">
+  <li><details><summary>Response <a class="term" href="#term-fresh">fresh</a> khi <a class="term" href="#term-age">age</a> chưa vượt <a class="term" href="#term-freshness-lifetime">freshness lifetime</a>; ngược lại là <a class="term" href="#term-stale">stale</a> <a class="src" href="../sources/rfc9111.html#q-4"></a></summary>
+    <div class="detail">
+      <pre><code>response_is_fresh = (freshness_lifetime &gt; current_age)</code></pre>
+      <p>Age được tính từ lúc origin server tạo response, hoặc từ lần validate thành công gần nhất. <a class="src" href="../sources/rfc9111.html#q-5"></a></p>
+    </div>
+  </details></li>
+  <li><details><summary>Freshness lifetime được tính theo thứ tự ưu tiên, lấy quy tắc đầu tiên khớp <a class="src" href="../sources/rfc9111.html#q-6"></a></summary>
+    <div class="detail">
+      <ol>
+        <li>Nếu là shared cache và có <code>s-maxage</code>: dùng giá trị này.</li>
+        <li>Nếu có <code>max-age</code>: dùng giá trị này.</li>
+        <li>Nếu có header <code>Expires</code>: lấy <code>Expires</code> trừ <code>Date</code>.</li>
+        <li>Nếu không có cái nào: cache có thể tự ước lượng (heuristic), xem ý dưới.</li>
+      </ol>
+    </div>
+  </details></li>
+  <li><details><summary>Khi server không ghi thời hạn, cache có thể tự ước lượng, thường bằng 10% khoảng thời gian kể từ <code>Last-Modified</code> <a class="src" href="../sources/rfc9111.html#q-7"></a></summary>
+    <div class="detail">
+      <p>Ví dụ: file sửa lần cuối 10 ngày trước → cache có thể coi response là fresh trong khoảng 1 ngày.</p>
+      <p>Hệ quả: không ghi <code>Cache-Control</code> không có nghĩa là không bị cache. <span class="inference">Suy luận</span></p>
+    </div>
+  </details></li>
+</ul>
+</section>
+
+<section>
+<h2>Validation</h2>
+<ul class="points">
+  <li><details><summary>Khi response đã stale, cache gửi conditional request đến origin server để hỏi response đã lưu còn dùng được không. Việc này gọi là <a class="term" href="#term-validation">validation</a> <a class="src" href="../sources/rfc9111.html#q-8"></a></summary>
+    <div class="detail">
+      <p>Conditional request thường dùng header <code>If-None-Match</code> (so sánh ETag) hoặc <code>If-Modified-Since</code> (so sánh thời gian). <span class="inference">Suy luận</span></p>
+    </div>
+  </details></li>
+  <li>Origin trả <code>304 Not Modified</code> → cache cập nhật metadata và dùng lại response đã lưu, không phải tải lại nội dung <a class="src" href="../sources/rfc9111.html#q-9"></a></li>
+</ul>
+</section>
+
+<section>
+<h2>Các directive quan trọng của Cache-Control</h2>
+<ul class="points">
+  <li><code>max-age=N</code>: response trở thành stale sau N giây <a class="src" href="../sources/rfc9111.html#q-15"></a></li>
+  <li><code>s-maxage=N</code>: giống <code>max-age</code> nhưng chỉ cho <a class="term" href="../glossary/index.html#term-shared-cache">shared cache</a>, và ghi đè cả <code>max-age</code> lẫn <code>Expires</code> <a class="src" href="../sources/rfc9111.html#q-16"></a></li>
+  <li><details><summary><code>no-cache</code> <strong>không</strong> có nghĩa là không cache: response vẫn được lưu, nhưng phải validate trước mỗi lần dùng <a class="src" href="../sources/rfc9111.html#q-10"></a></summary>
+    <div class="detail">
+      <p>Hay bị nhầm với <code>no-store</code>. Muốn không lưu gì thì dùng <code>no-store</code>.</p>
+      <p>Dạng có tham số, ví dụ <code>no-cache="Set-Cookie"</code>, ít được cache hỗ trợ đúng; thường bị xử lý như <code>no-cache</code> không tham số. <a class="src" href="../sources/rfc9111.html#q-18"></a></p>
+    </div>
+  </details></li>
+  <li><details><summary><code>no-store</code>: cache không được lưu bất kỳ phần nào của request lẫn response <a class="src" href="../sources/rfc9111.html#q-11"></a></summary>
+    <div class="detail">
+      <p>Không dùng <code>no-store</code> như cơ chế bảo mật: cache độc hại hoặc bị xâm nhập có thể không tuân theo. <a class="src" href="../sources/rfc9111.html#q-12"></a></p>
+    </div>
+  </details></li>
+  <li><code>private</code>: shared cache không được lưu; private cache vẫn được lưu <a class="src" href="../sources/rfc9111.html#q-17"></a></li>
+  <li><details><summary><code>must-revalidate</code>: khi đã stale thì bắt buộc validate; mất kết nối đến origin thì trả lỗi thay vì dùng response stale <a class="src" href="../sources/rfc9111.html#q-13"></a></summary>
+    <div class="detail">
+      <p>Mã lỗi nên dùng là <code>504 Gateway Timeout</code>.</p>
+      <p>Chỉ nên dùng khi dùng dữ liệu cũ gây sai nghiệp vụ, ví dụ giao dịch tài chính.</p>
+    </div>
+  </details></li>
+  <li>Khi các directive xung đột, ví dụ có cả <code>max-age</code> và <code>no-cache</code>: theo directive chặt nhất <a class="src" href="../sources/rfc9111.html#q-14"></a></li>
+  <li><details><summary>File tĩnh có hash trong tên (ví dụ <code>app.3f9a.js</code>) nên đặt <code>max-age</code> dài <span class="inference">Suy luận</span></summary>
+    <div class="detail">
+      <p>Nội dung đổi thì tên file đổi, nên URL và <a class="term" href="#term-cache-key">cache key</a> cũng đổi. Response cũ không bao giờ bị dùng nhầm.</p>
+    </div>
+  </details></li>
+</ul>
+</section>
+
+<section class="open-questions">
+<h2>Câu hỏi mở</h2>
+<ul>
+  <li>RFC 9111 không quy định thuật toán heuristic cụ thể. Các trình duyệt phổ biến thực tế dùng tỷ lệ bao nhiêu? Cần thêm nguồn.</li>
+  <li>Directive <code>immutable</code> và <code>stale-while-revalidate</code> không nằm trong nguồn hiện tại.</li>
+</ul>
+</section>
+
+<section class="glossary">
+<h2>Thuật ngữ</h2>
+<dl>
+  <dt id="term-fresh">fresh</dt>
+  <dd>
+    <p class="short">Response còn hạn: được dùng ngay mà không cần hỏi lại origin server.</p>
+    <p>Response là fresh khi age của nó chưa vượt freshness lifetime. <a class="src" href="../sources/rfc9111.html#q-4"></a></p>
+  </dd>
+
+  <dt id="term-stale">stale</dt>
+  <dd>
+    <p class="short">Response đã hết hạn: thường phải validate trước khi dùng lại.</p>
+    <p>Response là stale khi age đã vượt freshness lifetime. <a class="src" href="../sources/rfc9111.html#q-4"></a></p>
+  </dd>
+
+  <dt id="term-age">age</dt>
+  <dd>
+    <p class="short">Thời gian đã trôi qua kể từ khi origin tạo response, hoặc từ lần validate thành công gần nhất.</p>
+    <p>Mỗi lần validate thành công, age được tính lại từ đầu. <a class="src" href="../sources/rfc9111.html#q-5"></a></p>
+  </dd>
+
+  <dt id="term-freshness-lifetime">freshness lifetime</dt>
+  <dd>
+    <p class="short">Khoảng thời gian một response được coi là fresh, tính từ lúc origin tạo ra nó.</p>
+    <p>Lấy từ <code>s-maxage</code>, <code>max-age</code>, <code>Expires</code>, hoặc do cache tự ước lượng. <a class="src" href="../sources/rfc9111.html#q-6"></a></p>
+  </dd>
+
+  <dt id="term-cache-key">cache key</dt>
+  <dd>
+    <p class="short">Thông tin cache dùng để chọn response đã lưu, tối thiểu gồm method và URI.</p>
+    <p>Có thể gồm thêm các header được liệt kê trong <code>Vary</code>. <a class="src" href="../sources/rfc9111.html#q-2"></a></p>
+  </dd>
+
+  <dt id="term-validation">validation</dt>
+  <dd>
+    <p class="short">Cache hỏi lại origin server xem response đã lưu còn dùng được không.</p>
+    <p>Còn gọi là revalidation. Origin trả <code>304</code> nếu response đã lưu vẫn dùng được, hoặc trả response mới. <a class="src" href="../sources/rfc9111.html#q-8"></a></p>
+  </dd>
+</dl>
+</section>
+
+<section class="sources">
+<h2>Nguồn</h2>
+<ol>
+  <li><a href="../sources/rfc9111.html">RFC 9111: HTTP Caching</a> <span class="meta">· <a href="https://www.rfc-editor.org/rfc/rfc9111">bản gốc</a> · lưu ngày 2026-11-05</span></li>
+</ol>
+</section>
+
+</article>

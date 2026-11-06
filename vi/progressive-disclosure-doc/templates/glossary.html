@@ -1,0 +1,27 @@
+<!--
+  Template glossary chung: knowledge/glossary/content.html
+  - Chứa thuật ngữ dùng ở từ 2 chủ đề trở lên.
+  - Thay hết các {{...}}. Xóa các comment HTML này khi viết file thật.
+  - Sắp xếp thuật ngữ theo bảng chữ cái.
+-->
+<article data-title="Thuật ngữ chung" data-created="{{YYYY-MM-DD}}" data-updated="{{YYYY-MM-DD}}">
+
+<section class="glossary">
+<h2>Thuật ngữ</h2>
+<dl>
+  <dt id="term-{{id}}">{{thuật ngữ}}</dt>
+  <dd>
+    <p class="short">{{Định nghĩa 1 câu, dùng cho tooltip}}</p>
+    <p>{{Giải thích chi tiết}} <a class="src" href="../sources/{{nguồn}}.html#q-{{số}}"></a></p>
+  </dd>
+</dl>
+</section>
+
+<section class="sources">
+<h2>Nguồn</h2>
+<ol>
+  <li><a href="../sources/{{nguồn}}.html">{{Tiêu đề nguồn}}</a> <span class="meta">· <a href="{{URL gốc}}">bản gốc</a> · lưu ngày {{YYYY-MM-DD}}</span></li>
+</ol>
+</section>
+
+</article>

@@ -1,0 +1,45 @@
+<!--
+  Glossary chung: thuật ngữ dùng ở nhiều chủ đề.
+  Các chủ đề link đến đây bằng: <a class="term" href="../glossary/index.html#term-xxx">…</a>
+  Mỗi thuật ngữ: <dt id="term-xxx"> + <dd> gồm <p class="short"> (1 câu, dùng cho tooltip), phần giải thích chi tiết, và link nguồn.
+-->
+<article data-title="Thuật ngữ chung" data-created="2026-11-05" data-updated="2026-11-05">
+
+<section class="glossary">
+<h2>Thuật ngữ</h2>
+<dl>
+  <dt id="term-cache">cache</dt>
+  <dd>
+    <p class="short">Nơi lưu tạm các response đã nhận, cùng với bộ phận quản lý việc lưu, lấy ra và xoá chúng.</p>
+    <p>Mục đích là trả lời các request giống nhau về sau nhanh hơn và tốn ít băng thông hơn. <a class="src" href="../sources/rfc9111.html#q-19"></a></p>
+  </dd>
+
+  <dt id="term-shared-cache">shared cache</dt>
+  <dd>
+    <p class="short">Cache lưu response để dùng lại cho nhiều người dùng, ví dụ CDN hoặc proxy.</p>
+    <p>Thường nằm ở một máy trung gian giữa người dùng và server. <a class="src" href="../sources/rfc9111.html#q-20"></a></p>
+    <p>Vì dùng chung, shared cache không được lưu response riêng của một người (xem directive <code>private</code>).</p>
+  </dd>
+
+  <dt id="term-private-cache">private cache</dt>
+  <dd>
+    <p class="short">Cache chỉ phục vụ một người dùng, ví dụ cache của trình duyệt.</p>
+    <p>Thường là một phần của user agent (trình duyệt, app). <a class="src" href="../sources/rfc9111.html#q-21"></a></p>
+  </dd>
+
+  <dt id="term-origin-server">origin server</dt>
+  <dd>
+    <p class="short">Server gốc tạo ra response, là nơi cache hỏi lại khi cần kiểm tra response đã lưu còn dùng được không.</p>
+    <p>Ví dụ: server của ứng dụng đứng sau CDN. CDN là cache, server ứng dụng là origin. <span class="inference">Suy luận</span></p>
+  </dd>
+</dl>
+</section>
+
+<section class="sources">
+<h2>Nguồn</h2>
+<ol>
+  <li><a href="../sources/rfc9111.html">RFC 9111: HTTP Caching</a> <span class="meta">· <a href="https://www.rfc-editor.org/rfc/rfc9111">bản gốc</a> · lưu ngày 2026-11-05</span></li>
+</ol>
+</section>
+
+</article>

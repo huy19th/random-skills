@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kiến thức</title>
+<style>
+:root {
+  --bg: #fdfdfc;
+  --fg: #1f2328;
+  --muted: #656d76;
+  --line: #e5e7eb;
+  --accent: #0b6bcb;
+  --accent-shared: #7c3aed;
+  --soft: #f3f5f8;
+  --mark: #fff3bf;
+  --warn: #b45309;
+  --warn-bg: #fef3c7;
+  --tip-bg: #ffffff;
+  --shadow: 0 6px 24px rgba(0, 0, 0, .12);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15171a;
+    --fg: #e6e6e6;
+    --muted: #9aa3ad;
+    --line: #2d3138;
+    --accent: #5aa9ff;
+    --accent-shared: #b794ff;
+    --soft: #1e2126;
+    --mark: #4a3f12;
+    --warn: #fbbf24;
+    --warn-bg: #3b2f10;
+    --tip-bg: #22262c;
+    --shadow: 0 6px 24px rgba(0, 0, 0, .5);
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 72px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+a { color: var(--accent); }
+main { max-width: 780px; margin: 0 auto; padding: 0 20px 80px; }
+
+/* Header + toolbar */
+.page-header {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+.page-header .inner {
+  max-width: 780px; margin: 0 auto; padding: 10px 20px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.page-header h1 { font-size: 1.15rem; margin: 0; flex: 1; }
+.page-header .meta { color: var(--muted); font-size: .85rem; }
+.page-header .nav { font-size: .85rem; }
+.mode-switch { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.mode-switch[hidden] { display: none; }
+.mode-switch button {
+  border: 0; background: transparent; color: var(--muted);
+  padding: 4px 12px; font: inherit; font-size: .85rem; cursor: pointer;
+}
+.mode-switch button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+
+h2 { font-size: 1.2rem; margin: 2em 0 .6em; padding-bottom: .3em; border-bottom: 1px solid var(--line); }
+
+/* L0 */
+.tldr {
+  margin: 24px 0; padding: 14px 18px;
+  background: var(--soft); border-left: 4px solid var(--accent); border-radius: 6px;
+}
+.tldr::before { content: "TL;DR"; display: block; font-size: .75rem; font-weight: 700; color: var(--muted); letter-spacing: .05em; }
+.tldr p { margin: .2em 0; }
+
+/* L1 + L2 */
+ul.points { list-style: none; padding-left: 0; }
+ul.points > li { position: relative; padding-left: 22px; margin: .45em 0; }
+ul.points > li::before { content: "•"; position: absolute; left: 6px; color: var(--muted); }
+ul.points > li:has(> details)::before { content: none; }
+ul.points details > summary { list-style: none; cursor: pointer; margin-left: -22px; padding-left: 22px; position: relative; }
+ul.points details > summary::-webkit-details-marker { display: none; }
+ul.points details > summary::before {
+  content: "▸"; position: absolute; left: 4px; color: var(--accent);
+  transition: transform .15s;
+}
+ul.points details[open] > summary::before { transform: rotate(90deg); }
+ul.points details > summary:hover { background: var(--soft); border-radius: 4px; }
+.detail {
+  margin: .4em 0 .8em; padding: 8px 14px;
+  border-left: 2px solid var(--line); color: var(--fg);
+  font-size: .95rem;
+}
+.detail p { margin: .4em 0; }
+.detail ul { padding-left: 20px; }
+code { background: var(--soft); padding: 1px 5px; border-radius: 4px; font-size: .9em; }
+pre { background: var(--soft); padding: 10px 14px; border-radius: 6px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+
+/* Keyword */
+a.term {
+  color: var(--accent); text-decoration: underline dotted; text-underline-offset: 3px;
+}
+a.term.shared { color: var(--accent-shared); }
+
+/* Nguồn */
+a.src {
+  font-size: .72em; vertical-align: super; line-height: 0;
+  text-decoration: none; margin-left: 1px; white-space: nowrap;
+}
+.inference {
+  font-size: .72rem; font-weight: 600; color: var(--warn); background: var(--warn-bg);
+  padding: 1px 6px; border-radius: 4px; white-space: nowrap; margin-left: 4px;
+}
+
+/* Câu hỏi mở */
+.open-questions li { margin: .3em 0; }
+
+/* Glossary */
+.glossary dl { margin: 0; }
+.glossary dt { font-weight: 700; margin-top: 1.1em; padding: 2px 6px; border-radius: 4px; }
+.glossary dt:target, .glossary dt:target + dd { background: var(--mark); }
+.glossary dt:target { box-shadow: 0 0 0 4px var(--mark); }
+.glossary dd { margin: 0; padding: 2px 6px 6px 18px; border-radius: 4px; }
+.glossary dd .short { font-style: italic; margin: .2em 0; }
+
+/* Danh sách nguồn */
+.sources li { margin: .3em 0; }
+.sources .meta { color: var(--muted); font-size: .85rem; }
+
+/* Tooltip */
+#tip {
+  position: absolute; z-index: 100; max-width: 380px;
+  background: var(--tip-bg); color: var(--fg);
+  border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow);
+  padding: 10px 12px; font-size: .88rem; line-height: 1.5;
+}
+#tip[hidden] { display: none; }
+#tip .tip-title { font-weight: 700; }
+#tip .tip-scope { color: var(--muted); font-size: .75rem; margin-left: 6px; font-weight: 400; }
+#tip p { margin: .3em 0; }
+#tip blockquote { margin: .3em 0; padding: 4px 10px; border-left: 3px solid var(--mark); background: var(--soft); font-style: italic; }
+#tip .tip-link { display: inline-block; margin-top: 4px; font-weight: 600; }
+
+/* Trang index */
+.search { width: 100%; padding: 8px 12px; font: inherit; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); margin: 20px 0 8px; }
+.topics { list-style: none; padding: 0; }
+.topics li { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.topics .title { font-weight: 700; font-size: 1.05rem; }
+.topics .meta { color: var(--muted); font-size: .85rem; }
+.topics .summary { margin: .2em 0 0; }
+
+</style>
+</head>
+<body>
+<header class="page-header">
+  <div class="inner">
+    <h1>Kiến thức</h1>
+    <span class="nav"><a href="glossary/index.html">Thuật ngữ chung</a></span>
+  </div>
+</header>
+<main>
+<input class="search" type="search" placeholder="Tìm chủ đề…" autofocus>
+<ul class="topics">
+  <li data-text="http caching http cache lưu lại response để dùng lại cho các request sau, giảm độ trễ và băng thông. response còn fresh thì dùng ngay; đã stale thì phải validate với origin server trước khi dùng. server điều khiển cache chủ yếu bằng header cache-control.">
+    <a class="title" href="http-caching/index.html">HTTP Caching</a>
+    <div class="meta">Cập nhật 2026-11-05</div>
+    <p class="summary">HTTP cache lưu lại response để dùng lại cho các request sau, giảm độ trễ và băng thông. Response còn fresh thì dùng ngay; đã stale thì phải validate với origin server trước khi dùng. Server điều khiển cache chủ yếu bằng header Cache-Control.</p>
+  </li>
+</ul>
+</main>
+<script>
+(() => {
+  // ---------- View mode: compact / detailed ----------
+  const KEY = 'kn:' + location.pathname;
+  let state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+
+  const details = [...document.querySelectorAll('main ul.points details')];
+  details.forEach((d, i) => { d.dataset.k = d.id || 'd' + i; });
+  const buttons = [...document.querySelectorAll('.mode-switch button')];
+
+  function setMode(mode) {
+    state.mode = mode;
+    document.body.dataset.mode = mode;
+    buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+    if (mode === 'detailed') {
+      details.forEach(d => { d.open = true; });
+    } else {
+      const open = new Set(state.open || []);
+      details.forEach(d => { d.open = open.has(d.dataset.k); });
+    }
+    save();
+  }
+
+  // Compact mode remembers which bullets the user expanded.
+  details.forEach(d => d.addEventListener('toggle', () => {
+    if (state.mode === 'detailed') return;
+    state.open = details.filter(x => x.open).map(x => x.dataset.k);
+    save();
+  }));
+  buttons.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  document.addEventListener('keydown', e => {
+    if (e.target.closest('input, textarea') || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'm') setMode(state.mode === 'detailed' ? 'compact' : 'detailed');
+    if (e.key === 'Escape') hide();
+  });
+  if (!details.length) document.querySelectorAll('.mode-switch').forEach(s => { s.hidden = true; });
+  else if (buttons.length) setMode(state.mode || 'compact');
+
+  // ---------- Tooltip for keywords and sources ----------
+  const tip = document.createElement('div');
+  tip.id = 'tip';
+  tip.hidden = true;
+  tip.setAttribute('role', 'tooltip');
+  document.body.append(tip);
+
+  let current = null;
+  let showTimer = 0;
+  let hideTimer = 0;
+  let lastPointer = 'mouse';
+
+  const el = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  };
+
+  function fill(a) {
+    tip.replaceChildren();
+    if (a.classList.contains('term')) {
+      const title = el('div', 'tip-title', a.dataset.term || a.textContent);
+      if (a.classList.contains('shared')) title.append(el('span', 'tip-scope', 'Thuật ngữ chung'));
+      tip.append(title, el('p', '', a.dataset.short));
+      const link = el('a', 'tip-link', 'Xem chi tiết →');
+      link.href = a.href;
+      tip.append(link);
+    } else {
+      tip.append(el('div', 'tip-title', a.dataset.title));
+      tip.append(el('blockquote', '', a.dataset.quote));
+      const link = el('a', 'tip-link', 'Mở đoạn này trong nguồn →');
+      link.href = a.href;
+      tip.append(link);
+    }
+  }
+
+  function place(a) {
+    const r = a.getBoundingClientRect();
+    tip.style.left = '0px';
+    tip.style.top = '0px';
+    const w = tip.offsetWidth;
+    const h = tip.offsetHeight;
+    let left = r.left + window.scrollX;
+    left = Math.min(left, window.scrollX + document.documentElement.clientWidth - w - 8);
+    left = Math.max(left, window.scrollX + 8);
+    let top = r.bottom + window.scrollY + 6;
+    if (r.bottom + h + 12 > window.innerHeight && r.top > h + 12) top = r.top + window.scrollY - h - 6;
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+
+  function show(a) {
+    clearTimeout(hideTimer);
+    current = a;
+    fill(a);
+    tip.hidden = false;
+    place(a);
+  }
+  function hide() {
+    clearTimeout(showTimer);
+    tip.hidden = true;
+    current = null;
+  }
+  const scheduleHide = () => { clearTimeout(hideTimer); hideTimer = setTimeout(hide, 200); };
+
+  const target = e => e.target.closest && e.target.closest('a.term, a.src');
+
+  document.addEventListener('pointerdown', e => { lastPointer = e.pointerType; }, true);
+
+  document.addEventListener('mouseover', e => {
+    if (lastPointer === 'touch') return;
+    const a = target(e);
+    if (a) {
+      clearTimeout(hideTimer);
+      clearTimeout(showTimer);
+      showTimer = setTimeout(() => show(a), 120);
+    } else if (tip.contains(e.target)) {
+      clearTimeout(hideTimer);
+    }
+  });
+  document.addEventListener('mouseout', e => {
+    if (target(e) || tip.contains(e.target)) {
+      clearTimeout(showTimer);
+      scheduleHide();
+    }
+  });
+  document.addEventListener('focusin', e => { const a = target(e); if (a) show(a); });
+  document.addEventListener('focusout', e => { if (target(e)) scheduleHide(); });
+
+  // Touch: first tap shows the tooltip, the link inside it navigates.
+  document.addEventListener('click', e => {
+    const a = target(e);
+    if (a && lastPointer === 'touch' && current !== a) {
+      e.preventDefault();
+      show(a);
+      return;
+    }
+    if (!a && !tip.contains(e.target)) hide();
+  });
+  window.addEventListener('resize', () => { if (current) place(current); });
+
+  // ---------- Search on the index page ----------
+  const search = document.querySelector('.search');
+  if (search) {
+    const items = [...document.querySelectorAll('.topics li')];
+    search.addEventListener('input', () => {
+      const q = search.value.trim().toLowerCase();
+      items.forEach(li => { li.hidden = q && !li.dataset.text.includes(q); });
+    });
+  }
+})();
+
+</script>
+</body>
+</html>

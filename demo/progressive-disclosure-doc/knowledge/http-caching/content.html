@@ -1,0 +1,159 @@
+<article data-title="HTTP Caching" data-created="2026-11-06" data-updated="2026-11-06">
+
+<section class="tldr">
+  <p>An HTTP cache stores responses to reuse them for later requests, cutting latency and bandwidth.</p>
+  <p>A <a class="term" href="#term-fresh">fresh</a> response is used right away; a <a class="term" href="#term-stale">stale</a> one must be <a class="term" href="#term-validation">validated</a> with the <a class="term" href="../glossary/index.html#term-origin-server">origin server</a> before use.</p>
+  <p>Servers control caching mainly through the <code>Cache-Control</code> header.</p>
+</section>
+
+<section>
+<h2>How a cache works</h2>
+<ul class="points">
+  <li><details><summary>Reusing a stored response is the default behavior, unless something forbids it <a class="src" href="../sources/rfc9111.html#q-1"></a></summary>
+    <div class="detail">
+      <p>So the caching rules focus on <strong>preventing</strong> a cache from storing or reusing responses wrongly, not on forcing a cache to store any response.</p>
+    </div>
+  </details></li>
+  <li><details><summary>There are 2 kinds of cache: <a class="term" href="../glossary/index.html#term-shared-cache">shared cache</a> (CDN, proxy) and <a class="term" href="../glossary/index.html#term-private-cache">private cache</a> (browser) <a class="src" href="../sources/rfc9111.html#q-20"></a><a class="src" href="../sources/rfc9111.html#q-21"></a></summary>
+    <div class="detail">
+      <p>The distinction matters because some directives only apply to shared caches, e.g. <code>s-maxage</code> and <code>private</code>.</p>
+    </div>
+  </details></li>
+  <li><details><summary>A cache picks a stored response by its <a class="term" href="#term-cache-key">cache key</a>, at minimum the request method and URI <a class="src" href="../sources/rfc9111.html#q-2"></a></summary>
+    <div class="detail">
+      <p>In practice many caches only cache <code>GET</code> requests, so they use the URI alone as the cache key. <a class="src" href="../sources/rfc9111.html#q-3"></a></p>
+      <p>The <code>Vary</code> response header adds some request headers to the cache key, e.g. <code>Vary: Accept-Language</code> to store the English and French versions separately.</p>
+    </div>
+  </details></li>
+</ul>
+</section>
+
+<section>
+<h2>Fresh and stale</h2>
+<ul class="points">
+  <li><details><summary>A response is <a class="term" href="#term-fresh">fresh</a> while its <a class="term" href="#term-age">age</a> has not exceeded its <a class="term" href="#term-freshness-lifetime">freshness lifetime</a>; otherwise it is <a class="term" href="#term-stale">stale</a> <a class="src" href="../sources/rfc9111.html#q-4"></a></summary>
+    <div class="detail">
+      <pre><code>response_is_fresh = (freshness_lifetime &gt; current_age)</code></pre>
+      <p>Age counts from when the origin server generated the response, or from its last successful validation. <a class="src" href="../sources/rfc9111.html#q-5"></a></p>
+    </div>
+  </details></li>
+  <li><details><summary>The freshness lifetime is computed by an order of precedence, using the first rule that matches <a class="src" href="../sources/rfc9111.html#q-6"></a></summary>
+    <div class="detail">
+      <ol>
+        <li>Shared cache and <code>s-maxage</code> present: use that value.</li>
+        <li><code>max-age</code> present: use that value.</li>
+        <li><code>Expires</code> header present: <code>Expires</code> minus <code>Date</code>.</li>
+        <li>None of these: the cache may estimate one (heuristic), see the next point.</li>
+      </ol>
+    </div>
+  </details></li>
+  <li><details><summary>When the server sets no lifetime, the cache may estimate one, typically 10% of the time since <code>Last-Modified</code> <a class="src" href="../sources/rfc9111.html#q-7"></a></summary>
+    <div class="detail">
+      <p>Example: a file last modified 10 days ago → the cache may treat the response as fresh for about 1 day.</p>
+      <p>Consequence: omitting <code>Cache-Control</code> does not mean the response is not cached. <span class="inference">Inference</span></p>
+    </div>
+  </details></li>
+</ul>
+</section>
+
+<section>
+<h2>Validation</h2>
+<ul class="points">
+  <li><details><summary>Once a response is stale, the cache sends a conditional request to the origin server to ask whether the stored response is still usable. This is called <a class="term" href="#term-validation">validation</a> <a class="src" href="../sources/rfc9111.html#q-8"></a></summary>
+    <div class="detail">
+      <p>The conditional request usually carries <code>If-None-Match</code> (compares ETags) or <code>If-Modified-Since</code> (compares times). <span class="inference">Inference</span></p>
+    </div>
+  </details></li>
+  <li>The origin answers <code>304 Not Modified</code> → the cache updates the metadata and reuses the stored response without downloading the content again <a class="src" href="../sources/rfc9111.html#q-9"></a></li>
+</ul>
+</section>
+
+<section>
+<h2>Key Cache-Control directives</h2>
+<ul class="points">
+  <li><code>max-age=N</code>: the response becomes stale after N seconds <a class="src" href="../sources/rfc9111.html#q-15"></a></li>
+  <li><code>s-maxage=N</code>: like <code>max-age</code> but only for a <a class="term" href="../glossary/index.html#term-shared-cache">shared cache</a>, and it overrides both <code>max-age</code> and <code>Expires</code> <a class="src" href="../sources/rfc9111.html#q-16"></a></li>
+  <li><details><summary><code>no-cache</code> does <strong>not</strong> mean "do not cache": the response is still stored, but must be validated before every use <a class="src" href="../sources/rfc9111.html#q-10"></a></summary>
+    <div class="detail">
+      <p>Often confused with <code>no-store</code>. To store nothing at all, use <code>no-store</code>.</p>
+      <p>The qualified form, e.g. <code>no-cache="Set-Cookie"</code>, is poorly supported by caches; it is often treated as an unqualified <code>no-cache</code>. <a class="src" href="../sources/rfc9111.html#q-18"></a></p>
+    </div>
+  </details></li>
+  <li><details><summary><code>no-store</code>: the cache must not store any part of the request or the response <a class="src" href="../sources/rfc9111.html#q-11"></a></summary>
+    <div class="detail">
+      <p>Do not rely on <code>no-store</code> for security: a malicious or compromised cache may ignore it. <a class="src" href="../sources/rfc9111.html#q-12"></a></p>
+    </div>
+  </details></li>
+  <li><code>private</code>: a shared cache must not store the response; a private cache still may <a class="src" href="../sources/rfc9111.html#q-17"></a></li>
+  <li><details><summary><code>must-revalidate</code>: once stale, the response must be validated; if the origin is unreachable, return an error instead of the stale response <a class="src" href="../sources/rfc9111.html#q-13"></a></summary>
+    <div class="detail">
+      <p>The error code to use is <code>504 Gateway Timeout</code>.</p>
+      <p>Only use it when serving outdated data breaks the business logic, e.g. financial transactions.</p>
+    </div>
+  </details></li>
+  <li>When directives conflict, e.g. both <code>max-age</code> and <code>no-cache</code>: the most restrictive one wins <a class="src" href="../sources/rfc9111.html#q-14"></a></li>
+  <li><details><summary>Static files with a hash in their name (e.g. <code>app.3f9a.js</code>) should get a long <code>max-age</code> <span class="inference">Inference</span></summary>
+    <div class="detail">
+      <p>When the content changes, the file name changes, so the URL and the <a class="term" href="#term-cache-key">cache key</a> change too. An old response is never reused by mistake.</p>
+    </div>
+  </details></li>
+</ul>
+</section>
+
+<section class="open-questions">
+<h2>Open questions</h2>
+<ul>
+  <li>RFC 9111 does not define a specific heuristic algorithm. What ratio do popular browsers actually use? Needs another source.</li>
+  <li>The <code>immutable</code> and <code>stale-while-revalidate</code> directives are not covered by the current source.</li>
+</ul>
+</section>
+
+<section class="glossary">
+<h2>Terms</h2>
+<dl>
+  <dt id="term-fresh">fresh</dt>
+  <dd>
+    <p class="short">A response still within its lifetime: used right away without asking the origin server again.</p>
+    <p>A response is fresh while its age has not exceeded its freshness lifetime. <a class="src" href="../sources/rfc9111.html#q-4"></a></p>
+  </dd>
+
+  <dt id="term-stale">stale</dt>
+  <dd>
+    <p class="short">A response past its lifetime: usually must be validated before reuse.</p>
+    <p>A response is stale once its age has exceeded its freshness lifetime. <a class="src" href="../sources/rfc9111.html#q-4"></a></p>
+  </dd>
+
+  <dt id="term-age">age</dt>
+  <dd>
+    <p class="short">Time elapsed since the origin generated the response, or since its last successful validation.</p>
+    <p>Each successful validation resets the age. <a class="src" href="../sources/rfc9111.html#q-5"></a></p>
+  </dd>
+
+  <dt id="term-freshness-lifetime">freshness lifetime</dt>
+  <dd>
+    <p class="short">How long a response counts as fresh, measured from when the origin generated it.</p>
+    <p>Taken from <code>s-maxage</code>, <code>max-age</code>, <code>Expires</code>, or estimated by the cache. <a class="src" href="../sources/rfc9111.html#q-6"></a></p>
+  </dd>
+
+  <dt id="term-cache-key">cache key</dt>
+  <dd>
+    <p class="short">The information a cache uses to pick a stored response, at minimum the method and URI.</p>
+    <p>Can also include the headers listed in <code>Vary</code>. <a class="src" href="../sources/rfc9111.html#q-2"></a></p>
+  </dd>
+
+  <dt id="term-validation">validation</dt>
+  <dd>
+    <p class="short">The cache asks the origin server whether a stored response is still usable.</p>
+    <p>Also called revalidation. The origin answers <code>304</code> if the stored response is still usable, or sends a new response. <a class="src" href="../sources/rfc9111.html#q-8"></a></p>
+  </dd>
+</dl>
+</section>
+
+<section class="sources">
+<h2>Sources</h2>
+<ol>
+  <li><a href="../sources/rfc9111.html">RFC 9111: HTTP Caching</a> <span class="meta">· <a href="https://www.rfc-editor.org/rfc/rfc9111">original</a> · saved 2026-11-06</span></li>
+</ol>
+</section>
+
+</article>
