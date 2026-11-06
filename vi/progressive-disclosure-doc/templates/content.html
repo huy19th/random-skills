@@ -1,0 +1,69 @@
+<!--
+  Template file nội dung của một chủ đề: knowledge/<chủ-đề>/content.html
+  - Thay hết các {{...}}. Xóa các comment HTML này khi viết file thật.
+  - Chỉ dùng các tag dưới đây. Không viết CSS, JS hay thuộc tính style.
+  - Không sửa index.html: file đó do scripts/build.mjs sinh ra.
+-->
+<article data-title="{{Tên chủ đề}}" data-created="{{YYYY-MM-DD}}" data-updated="{{YYYY-MM-DD}}">
+
+<!-- L0: 1–3 câu, mỗi câu một <p>. -->
+<section class="tldr">
+  <p>{{Câu tóm tắt}}</p>
+</section>
+
+<!-- Mỗi nhóm ý là một <section> có <h2>. Thứ tự các nhóm: từ khái niệm nền tảng đến chi tiết. -->
+<section>
+<h2>{{Tên nhóm ý}}</h2>
+<ul class="points">
+
+  <!-- L1 có chi tiết (L2): -->
+  <li><details><summary>{{Ý chính}} <a class="src" href="../sources/{{nguồn}}.html#q-{{số}}"></a></summary>
+    <div class="detail">
+      <p>{{Giải thích, ví dụ}} <a class="src" href="../sources/{{nguồn}}.html#q-{{số}}"></a></p>
+    </div>
+  </details></li>
+
+  <!-- L1 không có chi tiết: -->
+  <li>{{Ý chính}} <a class="src" href="../sources/{{nguồn}}.html#q-{{số}}"></a></li>
+
+  <!-- Ý không có trong nguồn: -->
+  <li>{{Ý chính}} <span class="inference">Suy luận</span></li>
+
+  <!--
+    Keyword:
+    - Thuật ngữ của chủ đề này: <a class="term" href="#term-{{id}}">{{chữ}}</a>
+    - Thuật ngữ chung:          <a class="term" href="../glossary/index.html#term-{{id}}">{{chữ}}</a>
+    Link nguồn để trống nội dung: build tự điền [n].
+  -->
+</ul>
+</section>
+
+<!-- Bỏ mục này nếu không có câu hỏi mở. -->
+<section class="open-questions">
+<h2>Câu hỏi mở</h2>
+<ul>
+  <li>{{Điểm nguồn chưa trả lời, hoặc các nguồn mâu thuẫn nhau}}</li>
+</ul>
+</section>
+
+<!-- Thuật ngữ chỉ dùng trong chủ đề này. Bỏ mục này nếu không có. -->
+<section class="glossary">
+<h2>Thuật ngữ</h2>
+<dl>
+  <dt id="term-{{id}}">{{thuật ngữ}}</dt>
+  <dd>
+    <p class="short">{{Định nghĩa 1 câu, dùng cho tooltip}}</p>
+    <p>{{Giải thích chi tiết}} <a class="src" href="../sources/{{nguồn}}.html#q-{{số}}"></a></p>
+  </dd>
+</dl>
+</section>
+
+<!-- Thứ tự trong danh sách quyết định số [n]. Link đầu tiên của mỗi dòng phải là bản lưu. -->
+<section class="sources">
+<h2>Nguồn</h2>
+<ol>
+  <li><a href="../sources/{{nguồn}}.html">{{Tiêu đề nguồn}}</a> <span class="meta">· <a href="{{URL gốc}}">bản gốc</a> · lưu ngày {{YYYY-MM-DD}}</span></li>
+</ol>
+</section>
+
+</article>

@@ -1,0 +1,40 @@
+<article data-title="Shared glossary" data-created="2026-11-06" data-updated="2026-11-06">
+
+<section class="glossary">
+<h2>Terms</h2>
+<dl>
+  <dt id="term-cache">cache</dt>
+  <dd>
+    <p class="short">A local store of received responses, plus the subsystem that controls storing, retrieving and deleting them.</p>
+    <p>Its purpose is to answer equivalent future requests faster and with less bandwidth. <a class="src" href="../sources/rfc9111.html#q-19"></a></p>
+  </dd>
+
+  <dt id="term-origin-server">origin server</dt>
+  <dd>
+    <p class="short">The server that generates the response, and that a cache asks when it needs to check whether a stored response is still usable.</p>
+    <p>Example: the application server behind a CDN. The CDN is the cache, the application server is the origin. <span class="inference">Inference</span></p>
+  </dd>
+
+  <dt id="term-private-cache">private cache</dt>
+  <dd>
+    <p class="short">A cache serving a single user, e.g. the browser cache.</p>
+    <p>Usually part of the user agent (browser, app). <a class="src" href="../sources/rfc9111.html#q-21"></a></p>
+  </dd>
+
+  <dt id="term-shared-cache">shared cache</dt>
+  <dd>
+    <p class="short">A cache that stores responses for reuse by many users, e.g. a CDN or proxy.</p>
+    <p>Usually sits on an intermediary between users and the server. <a class="src" href="../sources/rfc9111.html#q-20"></a></p>
+    <p>Because it is shared, a shared cache must not store a response meant for one user (see the <code>private</code> directive).</p>
+  </dd>
+</dl>
+</section>
+
+<section class="sources">
+<h2>Sources</h2>
+<ol>
+  <li><a href="../sources/rfc9111.html">RFC 9111: HTTP Caching</a> <span class="meta">· <a href="https://www.rfc-editor.org/rfc/rfc9111">original</a> · saved 2026-11-06</span></li>
+</ol>
+</section>
+
+</article>

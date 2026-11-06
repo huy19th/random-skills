@@ -1,0 +1,27 @@
+<!--
+  Template for the shared glossary: knowledge/glossary/content.html
+  - Holds terms used in 2 or more topics.
+  - Replace every {{...}}. Delete these HTML comments in the real file.
+  - Sort terms alphabetically.
+-->
+<article data-title="Shared glossary" data-created="{{YYYY-MM-DD}}" data-updated="{{YYYY-MM-DD}}">
+
+<section class="glossary">
+<h2>Terms</h2>
+<dl>
+  <dt id="term-{{id}}">{{term}}</dt>
+  <dd>
+    <p class="short">{{1-sentence definition, used for the tooltip}}</p>
+    <p>{{Detailed explanation}} <a class="src" href="../sources/{{source}}.html#q-{{number}}"></a></p>
+  </dd>
+</dl>
+</section>
+
+<section class="sources">
+<h2>Sources</h2>
+<ol>
+  <li><a href="../sources/{{source}}.html">{{Source title}}</a> <span class="meta">· <a href="{{Original URL}}">original</a> · saved {{YYYY-MM-DD}}</span></li>
+</ol>
+</section>
+
+</article>
